@@ -1,0 +1,4 @@
+resource_group_name = "rg-terraform-staging"
+
+# Do NOT commit a real password to Git.
+# Set the password through TF_VAR_admin_password instead.
