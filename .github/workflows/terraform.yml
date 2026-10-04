@@ -1,9 +1,9 @@
 name: Terraform
 
 on:
-  pull_request:
+  push:
     branches:
-      - main
+      - feature/rambabu2026
     paths:
       - "modules/**"
       - "envs/**"
@@ -17,10 +17,6 @@ jobs:
     name: Terraform Plan - DEV
     runs-on: ubuntu-latest
 
-    defaults:
-      run:
-        working-directory: envs/dev
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -31,20 +27,24 @@ jobs:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          enable-AzPSSession: false
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
-      - name: Terraform Init
-        run: terraform init
-
       - name: Terraform Format Check
         run: terraform fmt -check -recursive
 
+      - name: Terraform Init
+        working-directory: envs/dev
+        run: terraform init
+
       - name: Terraform Validate
+        working-directory: envs/dev
         run: terraform validate
 
       - name: Terraform Plan
+        working-directory: envs/dev
         env:
           ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
@@ -52,4 +52,4 @@ jobs:
           ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
           TF_VAR_resource_group_name: rg-terraform-dev
           TF_VAR_admin_password: ${{ secrets.TF_ADMIN_PASSWORD }}
-        run: terraform plan
+        run: terraform plan -input=false
